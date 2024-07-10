@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "progressiveflight:block/flight_beacon_netherite"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "block.progressiveflight.flight_beacon_wooden": "Wooden flight beacon",
+  "block.progressiveflight.flight_beacon_copper": "Copper flight beacon",
+  "block.progressiveflight.flight_beacon_iron": "Iron flight beacon",
+  "block.progressiveflight.flight_beacon_diamond": "Diamond flight beacon",
+  "block.progressiveflight.flight_beacon_netherite": "Netherite flight beacon",
+  "itemGroup.progressiveflight": "Progressive Flight"
+}
