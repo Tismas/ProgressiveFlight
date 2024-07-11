@@ -4,5 +4,11 @@
   "block.progressiveflight.flight_beacon_iron": "Iron flight beacon",
   "block.progressiveflight.flight_beacon_diamond": "Diamond flight beacon",
   "block.progressiveflight.flight_beacon_netherite": "Netherite flight beacon",
+  "block.progressiveflight.flight_beacon_0.hover":  "Gives flight in 4 block radius",
+  "block.progressiveflight.flight_beacon_1.hover":  "Gives flight in 16 block radius",
+  "block.progressiveflight.flight_beacon_2.hover":  "Gives flight in 64 block radius",
+  "block.progressiveflight.flight_beacon_3.hover":  "Gives flight in the dimension it's placed in",
+  "block.progressiveflight.flight_beacon_4.hover":  "Gives flight everywhere",
+  "block.progressiveflight.flight_beacon.invalid_position": "You can place flight beacon only in the Overworld",
   "itemGroup.progressiveflight": "Progressive Flight"
 }
