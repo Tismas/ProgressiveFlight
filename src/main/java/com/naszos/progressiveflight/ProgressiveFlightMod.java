@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -56,6 +57,11 @@ public class ProgressiveFlightMod {
     public static final DeferredItem<BlockItem> FLIGHT_BEACON_DIAMOND_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("flight_beacon_diamond", FLIGHT_BEACON_DIAMOND_BLOCK);
     public static final DeferredItem<BlockItem> FLIGHT_BEACON_NETHERITE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("flight_beacon_netherite", FLIGHT_BEACON_NETHERITE_BLOCK);
 
+    public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_COPPER = ITEMS.registerSimpleItem("flight_beacon_upgrade_copper");
+    public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_IRON = ITEMS.registerSimpleItem("flight_beacon_upgrade_iron");
+    public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_DIAMOND = ITEMS.registerSimpleItem("flight_beacon_upgrade_diamond");
+    public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_NETHERITE = ITEMS.registerSimpleItem("flight_beacon_upgrade_netherite");
+
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlightBeaconBE>> FLIGHT_BEACON_WOODEN_BLOCK_ENTITY = BLOCK_ENTITIES
             .register("flight_beacon_wooden", () -> BlockEntityType.Builder.of((BlockPos pPos, BlockState pBlockState) -> new FlightBeaconBE(pPos, pBlockState, 0), FLIGHT_BEACON_WOODEN_BLOCK.get())
                     .build(null));
@@ -82,6 +88,11 @@ public class ProgressiveFlightMod {
                 output.accept(FLIGHT_BEACON_IRON_BLOCK_ITEM);
                 output.accept(FLIGHT_BEACON_DIAMOND_BLOCK_ITEM);
                 output.accept(FLIGHT_BEACON_NETHERITE_BLOCK_ITEM);
+
+                output.accept(FLIGHT_BEACON_UPGRADE_COPPER);
+                output.accept(FLIGHT_BEACON_UPGRADE_IRON);
+                output.accept(FLIGHT_BEACON_UPGRADE_DIAMOND);
+                output.accept(FLIGHT_BEACON_UPGRADE_NETHERITE);
             }).build());
 
     public ProgressiveFlightMod(IEventBus modEventBus, ModContainer modContainer) {
@@ -91,24 +102,33 @@ public class ProgressiveFlightMod {
         CREATIVE_MODE_TABS.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
-        modEventBus.addListener(this::addCreative);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
-    }
-
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
-            event.accept(FLIGHT_BEACON_WOODEN_BLOCK_ITEM);
-            event.accept(FLIGHT_BEACON_COPPER_BLOCK_ITEM);
-            event.accept(FLIGHT_BEACON_IRON_BLOCK_ITEM);
-            event.accept(FLIGHT_BEACON_DIAMOND_BLOCK_ITEM);
-            event.accept(FLIGHT_BEACON_NETHERITE_BLOCK_ITEM);
-        }
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 FLIGHT_BEACON_WOODEN_BLOCK_ENTITY.get(),
+                FlightBeaconBE::getCapability
+        );
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                FLIGHT_BEACON_COPPER_BLOCK_ENTITY.get(),
+                FlightBeaconBE::getCapability
+        );
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                FLIGHT_BEACON_IRON_BLOCK_ENTITY.get(),
+                FlightBeaconBE::getCapability
+        );
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                FLIGHT_BEACON_DIAMOND_BLOCK_ENTITY.get(),
+                FlightBeaconBE::getCapability
+        );
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                FLIGHT_BEACON_NETHERITE_BLOCK_ENTITY.get(),
                 FlightBeaconBE::getCapability
         );
     }
