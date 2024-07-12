@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -40,7 +41,7 @@ public class FlightBeaconBE extends BlockEntity {
     public FlightBeaconBE(BlockPos pPos, BlockState pBlockState, int tier) {
         super(FlightBeacon.blockEntities[tier].get(), pPos, pBlockState);
         this.tier = tier;
-        this.energy = new EnergyStorage((int)(rfCost[tier] * 1000 * Config.powerMultiplier), 100000);
+        this.energy = new EnergyStorage((int) (rfCost[tier] * 1000 * Config.powerMultiplier), 100000);
     }
 
     public IEnergyStorage getCapability(Direction side) {
@@ -101,9 +102,25 @@ public class FlightBeaconBE extends BlockEntity {
 
             double x = pos.getX() + 0.5 + deltaX;
             double z = pos.getZ() + 0.5 + deltaZ;
-            double y = pos.getY();
+            double y = getProperYForParticle(level, x, pos.getY(), z);
             level.addParticle(ParticleTypes.GLOW, false, x, y, z, 0, 0.4, 0);
         }
+    }
+
+    private static double getProperYForParticle(Level level, double x, double y, double z) {
+        int maxDiff = 20;
+        double res = y;
+
+        while (Math.abs(y-res) < maxDiff && res > level.getMinBuildHeight() && level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
+            res -= 1;
+        }
+        while (Math.abs(y-res) < maxDiff && res < level.getMaxBuildHeight() && !level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
+            res += 1;
+        }
+
+        if (Math.abs(y-res) == maxDiff) return y;
+
+        return res;
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T blockEntity) {
@@ -116,7 +133,7 @@ public class FlightBeaconBE extends BlockEntity {
                 showRangeParticles(level, pos, ranges[beacon.tier]);
             }
         } else {
-            int cost = Config.needsPower ? (int)(rfCost[beacon.tier] * Config.powerMultiplier) : 0;
+            int cost = Config.needsPower ? (int) (rfCost[beacon.tier] * Config.powerMultiplier) : 0;
             boolean hasEnoughPower = beacon.energy.getEnergyStored() >= cost;
             if (hasEnoughPower) {
                 beacon.energy.extractEnergy(cost, false);
