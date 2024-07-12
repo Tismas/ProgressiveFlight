@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ibi",
+    "bfb",
+    "ibi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:iron_ingot"
+    },
+    "f": {
+      "item": "progressiveflight:flight_beacon_copper"
+    },
+    "b": {
+      "item": "minecraft:iron_block"
+    }
+  },
+  "result": {
+    "id": "progressiveflight:flight_beacon_iron",
+    "count": 1
+  }
+}

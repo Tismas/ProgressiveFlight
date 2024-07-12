@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ibi",
+    "bpb",
+    "ibi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "p": {
+      "item": "minecraft:diamond"
+    },
+    "b": {
+      "item": "minecraft:netherite_block"
+    }
+  },
+  "result": {
+    "id": "progressiveflight:flight_beacon_upgrade_netherite",
+    "count": 1
+  }
+}

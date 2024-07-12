@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ibi",
+    "bpb",
+    "ibi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:copper_ingot"
+    },
+    "p": {
+      "tag": "progressiveflight:woods"
+    },
+    "b": {
+      "item": "minecraft:copper_block"
+    }
+  },
+  "result": {
+    "id": "progressiveflight:flight_beacon_upgrade_copper",
+    "count": 1
+  }
+}

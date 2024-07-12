@@ -141,10 +141,12 @@ public class FlightBeacon extends Block implements EntityBlock {
         if (e.getLevel().isClientSide()) return;
 
         Entity entity = e.getEntity();
-        if (entity != null && e.getPlacedBlock().getBlock() instanceof FlightBeacon && !canBePlaced(entity.level())) {
-            e.setCanceled(true);
-            if (entity instanceof Player) {
-                entity.sendSystemMessage(Component.translatable("block.progressiveflight.flight_beacon.invalid_position"));
+        if (entity != null && e.getPlacedBlock().getBlock() instanceof FlightBeacon) {
+            if (!canBePlaced(entity.level())) {
+                e.setCanceled(true);
+                if (entity instanceof Player) {
+                    entity.sendSystemMessage(Component.translatable("block.progressiveflight.flight_beacon.invalid_position"));
+                }
             }
         }
     }

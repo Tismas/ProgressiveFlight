@@ -66,6 +66,7 @@ public class FlightBeaconBE extends BlockEntity {
             double distance = dist(player, pos);
             return range > distance;
         }
+
         if (tier == 3) {
             return player.getCommandSenderWorld().dimension().compareTo(this.level.dimension()) == 0;
         }

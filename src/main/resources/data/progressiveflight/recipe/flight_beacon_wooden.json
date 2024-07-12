@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sws",
+    "wgw",
+    "sws"
+  ],
+  "key": {
+    "s": {
+      "item": "minecraft:stick"
+    },
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "w": {
+      "tag": "progressiveflight:woods"
+    }
+  },
+  "result": {
+    "id": "progressiveflight:flight_beacon_wooden",
+    "count": 1
+  }
+}

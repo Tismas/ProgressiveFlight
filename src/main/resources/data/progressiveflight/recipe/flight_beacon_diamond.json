@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ibi",
+    "bfb",
+    "ibi"
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:diamond"
+    },
+    "f": {
+      "item": "progressiveflight:flight_beacon_iron"
+    },
+    "b": {
+      "item": "minecraft:diamond_block"
+    }
+  },
+  "result": {
+    "id": "progressiveflight:flight_beacon_diamond",
+    "count": 1
+  }
+}
