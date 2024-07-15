@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "progressiveflight:flight_beacon_copper",
+    "progressiveflight:flight_beacon_iron",
+    "progressiveflight:flight_beacon_diamond",
+    "progressiveflight:flight_beacon_netherite"
+  ]
+}

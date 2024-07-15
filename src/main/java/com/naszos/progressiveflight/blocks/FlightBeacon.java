@@ -56,7 +56,7 @@ public class FlightBeacon extends Block implements EntityBlock {
     };
 
     public FlightBeacon(Properties properties, int tier) {
-        super(properties);
+        super(properties.destroyTime(2).lightLevel((bs) -> 8).noOcclusion());
         assert tier >= 0 && tier <= 4;
         this.tier = tier;
     }

@@ -8,16 +8,16 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import org.slf4j.Logger;
-import net.minecraft.core.Direction;
 
 import com.mojang.logging.LogUtils;
 
@@ -41,15 +41,15 @@ public class ProgressiveFlightMod {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_WOODEN_BLOCK = BLOCKS.registerBlock("flight_beacon_wooden", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 0),
-            BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+            BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(2.0F));
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_COPPER_BLOCK = BLOCKS.registerBlock("flight_beacon_copper", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 1),
-            BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.COPPER).strength(3.0F, 6.0F));
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_IRON_BLOCK = BLOCKS.registerBlock("flight_beacon_iron", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 2),
-            BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+            BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.METAL).strength(5.0F, 6.0F));
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_DIAMOND_BLOCK = BLOCKS.registerBlock("flight_beacon_diamond", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 3),
-            BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+            BlockBehaviour.Properties.of().mapColor(MapColor.DIAMOND).sound(SoundType.METAL).strength(5.0F, 6.0F));
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_NETHERITE_BLOCK = BLOCKS.registerBlock("flight_beacon_netherite", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 4),
-            BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS));
+            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK).sound(SoundType.NETHERITE_BLOCK).strength(50.0F, 1200.0F));
 
     public static final DeferredItem<BlockItem> FLIGHT_BEACON_WOODEN_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("flight_beacon_wooden", FLIGHT_BEACON_WOODEN_BLOCK);
     public static final DeferredItem<BlockItem> FLIGHT_BEACON_COPPER_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("flight_beacon_copper", FLIGHT_BEACON_COPPER_BLOCK);
