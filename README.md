@@ -1,27 +1,18 @@
+# Progressive Flight
 
-Installation information
-=======
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions at [github](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+## Mod adds blocks that give creative flight in a radius around the block
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+### Blocks and items
+- wooden tier - 4 blocks
+- copper tier - 16 blocks
+- iron tier - 64 blocks
+- diamond tier - dimension in which block is placed
+- netherite - cross dimension
 
-> **Note**: For Eclipse, use tasks in `Launch Group` instead of ones founds in `Java Application`. A preparation task must run before launching the game. NeoGradle uses launch groups to do these subsequently.
+### Configuration
+It's configurable to:
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
-
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
-
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+- require power or not
+- scale power requirements (by default it takes 4/16/64/1024/4096 RF/tick)
+- allow or disallow placement of the blocks in other dimensions (so that flight in the end or nether requires you to build netherite tier item)

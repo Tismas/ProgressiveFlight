@@ -13,7 +13,7 @@ public class Config {
 
     private static final ModConfigSpec.BooleanValue NEEDS_POWER = BUILDER
             .comment("Should flight beacon require power")
-            .define("needsPower", true);
+            .define("needsPower", false);
 
     public static final ModConfigSpec.DoubleValue POWER_REQ_MULTIPLIER = BUILDER
             .comment("How much power should it use (if needsPower is true)? (by default (multiplier = 1) it's 4/16/64/1024/4096 RF/T)")

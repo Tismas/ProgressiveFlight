@@ -5,9 +5,13 @@ import com.naszos.progressiveflight.ProgressiveFlightMod;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -85,15 +89,6 @@ public class FlightBeacon extends Block implements EntityBlock {
     }
 
     @Override
-    protected void onPlace(@NotNull BlockState pState, Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pOldState, boolean pMovedByPiston) {
-        BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
-        if (blockEntity instanceof FlightBeaconBE) {
-            ((FlightBeaconBE) blockEntity).onPlace(pLevel, pPos);
-        }
-        super.onPlace(pState, pLevel, pPos, pOldState, pMovedByPiston);
-    }
-
-    @Override
     public void appendHoverText(@NotNull ItemStack pStack, Item.@NotNull TooltipContext pContext, List<Component> pTooltipComponents, @NotNull TooltipFlag pTooltipFlag) {
         pTooltipComponents.add(Component.translatable("block.progressiveflight.flight_beacon_%s.hover".formatted(tier)).withStyle(ChatFormatting.GRAY));
         super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
@@ -139,14 +134,24 @@ public class FlightBeacon extends Block implements EntityBlock {
     @SubscribeEvent
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent e) {
         if (e.getLevel().isClientSide()) return;
+        if (!(e.getPlacedBlock().getBlock() instanceof FlightBeacon)) return;
 
         Entity entity = e.getEntity();
-        if (entity != null && e.getPlacedBlock().getBlock() instanceof FlightBeacon) {
-            if (!canBePlaced(entity.level())) {
-                e.setCanceled(true);
-                if (entity instanceof Player) {
-                    entity.sendSystemMessage(Component.translatable("block.progressiveflight.flight_beacon.invalid_position"));
-                }
+        if (entity == null) return;
+
+        ServerLevel level = (ServerLevel) entity.level();
+        BlockEntity blockEntity = level.getBlockEntity(e.getPos());
+        if (blockEntity instanceof FlightBeaconBE) {
+            ((FlightBeaconBE) blockEntity).onPlace(level, e.getPos(), entity);
+        }
+
+        if (!canBePlaced(level)) {
+            e.setCanceled(true);
+            if (entity instanceof Player) {
+                ServerPlayer sPlayer = (ServerPlayer) entity;
+                int slot = sPlayer.getInventory().selected;
+                sPlayer.connection.send(new ClientboundContainerSetSlotPacket(ClientboundContainerSetSlotPacket.PLAYER_INVENTORY , 0, slot, sPlayer.getSlot(slot).get()));
+                sPlayer.sendSystemMessage(Component.translatable("block.progressiveflight.flight_beacon.invalid_position"));
             }
         }
     }

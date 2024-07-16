@@ -1,22 +1,30 @@
 package com.naszos.progressiveflight;
 
+import com.mojang.serialization.Codec;
 import com.naszos.progressiveflight.blocks.FlightBeacon;
 import com.naszos.progressiveflight.blocks.FlightBeaconBE;
+import com.naszos.progressiveflight.net.BeaconWorkingPayload;
+import com.naszos.progressiveflight.net.ClientPayloadHandler;
+import com.naszos.progressiveflight.net.ServerPayloadHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.handling.DirectionalPayloadHandler;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -27,10 +35,13 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 @Mod(ProgressiveFlightMod.MODID)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ProgressiveFlightMod {
     public static final String MODID = "progressiveflight";
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -39,6 +50,7 @@ public class ProgressiveFlightMod {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
 
     public static final DeferredBlock<FlightBeacon> FLIGHT_BEACON_WOODEN_BLOCK = BLOCKS.registerBlock("flight_beacon_wooden", (BlockBehaviour.Properties properties) -> new FlightBeacon(properties, 0),
             BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).sound(SoundType.WOOD).strength(2.0F));
@@ -61,6 +73,10 @@ public class ProgressiveFlightMod {
     public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_IRON = ITEMS.registerSimpleItem("flight_beacon_upgrade_iron");
     public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_DIAMOND = ITEMS.registerSimpleItem("flight_beacon_upgrade_diamond");
     public static final DeferredItem<Item> FLIGHT_BEACON_UPGRADE_NETHERITE = ITEMS.registerSimpleItem("flight_beacon_upgrade_netherite");
+
+    public static final Supplier<AttachmentType<List<String>>> BLOCK_OWNERS = ATTACHMENT_TYPES.register(
+            "block_owners", () -> AttachmentType.builder(() -> (List<String>)new ArrayList<String>()).serialize(Codec.STRING.listOf()).build()
+    );
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FlightBeaconBE>> FLIGHT_BEACON_WOODEN_BLOCK_ENTITY = BLOCK_ENTITIES
             .register("flight_beacon_wooden", () -> BlockEntityType.Builder.of((BlockPos pPos, BlockState pBlockState) -> new FlightBeaconBE(pPos, pBlockState, 0), FLIGHT_BEACON_WOODEN_BLOCK.get())
@@ -100,6 +116,7 @@ public class ProgressiveFlightMod {
         ITEMS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        ATTACHMENT_TYPES.register(modEventBus);
 
         modEventBus.addListener(this::registerCapabilities);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -130,6 +147,19 @@ public class ProgressiveFlightMod {
                 Capabilities.EnergyStorage.BLOCK,
                 FLIGHT_BEACON_NETHERITE_BLOCK_ENTITY.get(),
                 FlightBeaconBE::getCapability
+        );
+    }
+
+    @SubscribeEvent
+    public static void registerPayloadHandlers(final RegisterPayloadHandlersEvent event) {
+        final PayloadRegistrar registrar = event.registrar("1.0.0");
+        registrar.playBidirectional(
+                BeaconWorkingPayload.TYPE,
+                BeaconWorkingPayload.STREAM_CODEC,
+                new DirectionalPayloadHandler<>(
+                        ClientPayloadHandler::handleData,
+                        ServerPayloadHandler::handleData
+                )
         );
     }
 }

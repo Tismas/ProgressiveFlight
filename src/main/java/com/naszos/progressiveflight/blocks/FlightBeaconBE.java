@@ -2,6 +2,7 @@ package com.naszos.progressiveflight.blocks;
 
 import com.naszos.progressiveflight.Config;
 import com.naszos.progressiveflight.ProgressiveFlightMod;
+import com.naszos.progressiveflight.net.BeaconWorkingPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -9,9 +10,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,9 +27,10 @@ import net.neoforged.neoforge.common.world.chunk.TicketController;
 import net.neoforged.neoforge.energy.EnergyStorage;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.minecraft.core.Direction;
+import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Vector3f;
 
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 @EventBusSubscriber(modid = ProgressiveFlightMod.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class FlightBeaconBE extends BlockEntity {
@@ -37,6 +41,8 @@ public class FlightBeaconBE extends BlockEntity {
     private final UUID id = UUID.randomUUID();
     private final static TicketController ticketController = new TicketController(ResourceLocation.fromNamespaceAndPath(ProgressiveFlightMod.MODID, "chunk_loader"));
     public final EnergyStorage energy;
+    private boolean hadPowerLastTick = false;
+    private boolean showParticles = true;
 
     public FlightBeaconBE(BlockPos pPos, BlockState pBlockState, int tier) {
         super(FlightBeacon.blockEntities[tier].get(), pPos, pBlockState);
@@ -66,6 +72,9 @@ public class FlightBeaconBE extends BlockEntity {
             double distance = dist(player, pos);
             return range > distance;
         }
+
+        List<String> owners = this.getData(ProgressiveFlightMod.BLOCK_OWNERS);
+        if (!owners.isEmpty() && !owners.contains(player.getStringUUID())) return false;
 
         if (tier == 3) {
             return player.getCommandSenderWorld().dimension().compareTo(this.level.dimension()) == 0;
@@ -112,14 +121,14 @@ public class FlightBeaconBE extends BlockEntity {
         int maxDiff = 20;
         double res = y;
 
-        while (Math.abs(y-res) < maxDiff && res > level.getMinBuildHeight() && level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
+        while (Math.abs(y - res) < maxDiff && res > level.getMinBuildHeight() && level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
             res -= 1;
         }
-        while (Math.abs(y-res) < maxDiff && res < level.getMaxBuildHeight() && !level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
+        while (Math.abs(y - res) < maxDiff && res < level.getMaxBuildHeight() && !level.getBlockState(new BlockPos((int) x, (int) res, (int) z)).is(Blocks.AIR)) {
             res += 1;
         }
 
-        if (Math.abs(y-res) == maxDiff) return y;
+        if (Math.abs(y - res) == maxDiff) return y;
 
         return res;
     }
@@ -130,13 +139,20 @@ public class FlightBeaconBE extends BlockEntity {
 
         if (level.isClientSide) {
             if (tickInSecond != 0) return;
-            if (beacon.tier < 3) {
+            if (beacon.tier < 3 && beacon.showParticles) {
                 showRangeParticles(level, pos, ranges[beacon.tier]);
             }
         } else {
+            ServerLevel sLevel = (ServerLevel) level;
             int cost = Config.needsPower ? (int) (rfCost[beacon.tier] * Config.powerMultiplier) : 0;
             boolean hasEnoughPower = beacon.energy.getEnergyStored() >= cost;
             if (hasEnoughPower) {
+                if (!beacon.hadPowerLastTick) {
+                    beacon.hadPowerLastTick = true;
+                    if (beacon.tier < 3) {
+                        PacketDistributor.sendToPlayersTrackingChunk(sLevel, new ChunkPos(pos), new BeaconWorkingPayload(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), true));
+                    }
+                }
                 beacon.energy.extractEnergy(cost, false);
 
                 level.players().forEach(player -> {
@@ -144,6 +160,11 @@ public class FlightBeaconBE extends BlockEntity {
                         beacon.grantFlight(player);
                     }
                 });
+            } else if (beacon.hadPowerLastTick) {
+                beacon.hadPowerLastTick = false;
+                if (beacon.tier < 3) {
+                    PacketDistributor.sendToPlayersTrackingChunk(sLevel, new ChunkPos(pos), new BeaconWorkingPayload(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), false));
+                }
             }
 
             beacon.playersWithGrantedFlight.forEach(player -> {
@@ -165,10 +186,17 @@ public class FlightBeaconBE extends BlockEntity {
         ticketController.forceChunk((ServerLevel) pLevel, pPos, SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ()), false, true);
     }
 
-    public void onPlace(Level pLevel, BlockPos pPos) {
-        if (pLevel.isClientSide) return;
-        ServerLevel level = (ServerLevel) pLevel;
-        ticketController.forceChunk((ServerLevel) pLevel, pPos, SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ()), true, true);
+    public void onPlace(ServerLevel pLevel, BlockPos pPos, Entity owner) {
+        if (owner instanceof Player) {
+            ArrayList<String> owners = new ArrayList<>();
+            owners.add(owner.getStringUUID());
+            this.setData(ProgressiveFlightMod.BLOCK_OWNERS, owners);
+        }
+        ticketController.forceChunk(pLevel, pPos, SectionPos.blockToSectionCoord(pPos.getX()), SectionPos.blockToSectionCoord(pPos.getZ()), true, true);
+    }
+
+    public void setParticlesVisible(boolean visible) {
+        this.showParticles = visible;
     }
 
     @SubscribeEvent
