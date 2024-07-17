@@ -42,7 +42,7 @@ public class FlightBeaconBE extends BlockEntity {
     private final static TicketController ticketController = new TicketController(ResourceLocation.fromNamespaceAndPath(ProgressiveFlightMod.MODID, "chunk_loader"));
     public final EnergyStorage energy;
     private boolean hadPowerLastTick = false;
-    private boolean showParticles = true;
+    private boolean showParticles = !Config.needsPower;
 
     public FlightBeaconBE(BlockPos pPos, BlockState pBlockState, int tier) {
         super(FlightBeacon.blockEntities[tier].get(), pPos, pBlockState);
